@@ -1,0 +1,119 @@
+import React, { useState } from 'react'
+import "../pageStyles/products.css"
+import Navbar from '../components/Navbar'
+import Footer from './Footer'
+import PageTitle from '../components/PageTitle'
+import { useSelector, useDispatch } from 'react-redux'
+import Product from '../components/Product'
+import { useEffect } from 'react'
+import { getProduct, removeErrors } from '../features/products/productSlice'
+import { toast } from 'react-toastify'
+import Loader from '../components/Loader'
+import { useParams, useLocation, useNavigate } from 'react-router-dom'
+import Pagination from '../components/Pagination'
+
+
+function Products() {
+    const { loading, error, products, resultsPerPage, productCount } = useSelector(
+        (state) => state.product
+    );
+    const dispatch = useDispatch();
+
+    const location = useLocation();
+    const URLSearchParams = new URLSearchParams(location.search)
+    const keyword = URLSearchParams.get('keyword') || '';
+    const category = URLSearchParams.get('category') || '';
+
+    const pageFromURL = (URLSearchParams.get('page'),10) || 1;
+    const [currentPage, setCurrentPage] = useState(pageFromURL);
+    const navigate = useNavigate()
+    const categories = []
+
+
+    useEffect(() => {
+        dispatch(getProduct({keyword, page:currentPage, category}));
+    }, [dispatch, keyword, category]);
+
+    useEffect(() => {
+        if (error) {
+          toast.error(error.message, {
+            position: toast.POSITION.TOP_RIGHT,
+            autoClose: 3000,
+          });
+          dispatch(removeErrors());
+        }
+      }, [dispatch, error]);
+
+      const handlePageChange=(page)=>{
+        if(page!==currentPage){
+          setCurrentPage(page);
+          const newSearchParams=new URLSearchParams(location.search)
+          if(page==1){
+            newSearchParams.delete('page');
+          }else{
+            newSearchParams.set('page', page)
+          }
+          navigate(`?${newSearchParams.toString()}`)
+        }
+      }
+    const handleCategoryClick=(category)=>{
+      const newSearchParams=new URLSearchParams(location.search)
+      newSearchParams.set('category', category);
+      newSearchParams.delete('page')
+    }
+      
+    
+  return (
+    <>
+    {loading ? (
+      <>
+        <PageTitle title="All Products" />
+        <Navbar />
+        <Loader />
+        <Footer />
+      </>
+    ) : (
+      <>
+        <PageTitle title="All Products" />
+        <Navbar />
+        <div className="products-layout">
+            <div className="filter-section">
+                <h3 className="filter-heading">
+                  CATEGORIES
+                </h3>
+                <ul>
+                  {
+                    categories.map((category)=>{
+                        return(
+                          <li key={category} onClick={()=>handleCategoryClick}>
+                            {category}
+                          </li>
+                        )
+                    })
+                  }
+                </ul>
+                {/*render filter options here*/}
+            </div>
+            <div className="products-section">
+                {products.length > 0 ? (
+                    <div className="products-product-container">
+                        {products.map((product) => (
+                            <Product key={product._id} product={product} />
+                        ))}
+                    </div>
+                ) : (
+                    <NoProducts keyword={keyword} />
+                )}
+                <Pagination 
+                  currentPage={currentPage}
+                  onPageChange={handlePageChange}
+                />
+            </div>
+        </div>
+        <Footer />
+    </>)}
+    </>
+  )
+}
+
+export default Products
