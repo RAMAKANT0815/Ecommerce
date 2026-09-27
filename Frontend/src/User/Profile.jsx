@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import PageTitle from "../components/PageTitle";
 import '../UserStyles/Profile.css'
+import Loader from "../components/Loader";
 
 
 const Profile = () => {
@@ -17,7 +18,7 @@ const Profile = () => {
 
   return (
     <>
-   {loading? (<loading/>) : ( <div className="profile-container">
+   {loading? (<Loader />) : ( <div className="profile-container">
       <PageTitle title={`Profile - ${user?.name}`} />
       {/* Profile Image Section */}
       <div className="profile-image">

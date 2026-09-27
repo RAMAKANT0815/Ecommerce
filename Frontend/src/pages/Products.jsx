@@ -51,7 +51,7 @@ function Products() {
           if(page==1){
             newSearchParams.delete('page');
           }else{
-            newSearchParams.set('page', page)
+            newSearchParams.set('page', page);
           }
           navigate(`?${newSearchParams.toString()}`)
         }

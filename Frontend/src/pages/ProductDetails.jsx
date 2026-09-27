@@ -11,10 +11,11 @@ import { useEffect } from 'react';
 import { getProductDetails, removeErrors } from '../features/products/productSlice';
 import { toast } from 'react-toastify';
 import Loader from '../components/Loader';
+import { addItemsToCart } from '../features/cart/cartSlice';
 
 function ProductDetails() {
   const [rating, setRating] = useState(0);
-
+  const [quantity, setQuantity] = useState(1);
   const handleRatingChange = (newRating) => {
     setRating(newRating);
   };
@@ -61,7 +62,28 @@ function ProductDetails() {
         </>
       )
     }
+    const decreaseQuantity = () => {
+      if(product.stock <= 1){
+        toast.error("can not decrease beyond 1", {position: 'top-center', autoClose: 3000})
+        dispatch(removeErrors());
+        return ;
+      }
+      setQuantity(qty => qty-1);
+    }
 
+    const increaseQuantity = () => {
+      if(product.stock <= quantity){
+        toast.error("can not exceed beyond stock", {position: 'top-center', autoClose: 3000})
+        dispatch(removeErrors());
+        return ;
+      }
+      setQuantity(qty => qty+1);
+      
+    }
+
+    const addToCart = () => {
+      dispatch(addItemsToCart({id, quantity}))
+    }
   return (
     <>
       <PageTitle title={`${product.name} - Details`} />
@@ -95,19 +117,19 @@ function ProductDetails() {
                     Quantity:
                   </span>
 
-                  <button className="quantity-button">-</button>
+                  <button className="quantity-button" onClick={decreaseQuantity}>-</button>
 
                   <input
                     type="text"
-                    value={1}
+                    value={quantity}
                     className="quantity-input"
                     readOnly
                   />
 
-                  <button className="quantity-button">+</button>
+                  <button className="quantity-button" onClick={increaseQuantity}>+</button>
                 </div>
 
-                <button className="add-to-cart-btn">
+                <button className="add-to-cart-btn" onClick={addToCart}>
                   Add to Cart
                 </button>
               </>
